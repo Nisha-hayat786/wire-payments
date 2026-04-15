@@ -17,6 +17,7 @@ export function SignupClient() {
   const [password, setPassword] = useState('');
   const [businessName, setBusinessName] = useState('');
   const [loading, setLoading] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
   const router = useRouter();
   const supabase = createClient();
 
@@ -38,18 +39,8 @@ export function SignupClient() {
       if (error) throw error;
 
       if (data.user) {
-        const { error: merchantError } = await supabase
-          .from('merchants')
-          .insert([{
-            owner_id: data.user.id,
-            business_name: businessName,
-            wallet_address: '',
-          }]);
-
-        if (merchantError) throw merchantError;
-
-        toast.success(`Welcome to WirePayments!`);
-        router.push('/dashboard');
+        setIsSubmitted(true);
+        toast.success(Verification email sent!);
       }
     } catch (err: any) {
       toast.error(err.message);
@@ -102,76 +93,104 @@ export function SignupClient() {
           animate={{ opacity: 1, scale: 1 }}
           className="w-full max-w-[440px]"
         >
-
-          <Card className="border-soft-blue overflow-hidden bg-white">
-            <CardHeader className="space-y-1 pt-8 px-10">
-              <CardTitle className="text-2xl font-light text-deep-navy">Create your account</CardTitle>
-              <CardDescription className="text-slate text-sm">
-                Get started with WirePayments in minutes.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="px-10 pb-8 pt-4">
-              <form onSubmit={handleSignup} className="space-y-4">
-                <div className="space-y-2">
-                  <Label className="text-[10px] font-bold text-slate uppercase tracking-widest">Business Name</Label>
-                  <div className="relative">
-                    <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate/40" />
-                    <Input
-                      placeholder="e.g. Acme Corp"
-                      className="pl-10 h-11 border-soft-blue bg-white focus:ring-stripe-purple"
-                      value={businessName}
-                      onChange={(e) => setBusinessName(e.target.value)}
-                      required
-                    />
-                  </div>
+          {isSubmitted ? (
+            <Card className="border-soft-blue overflow-hidden bg-white">
+              <CardContent className="px-10 py-12 text-center space-y-6">
+                <div className="w-16 h-16 bg-stripe-purple/10 rounded-full flex items-center justify-center mx-auto mb-2 text-stripe-purple">
+                  <Mail className="w-8 h-8" />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-[10px] font-bold text-slate uppercase tracking-widest">Email Address</Label>
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate/40" />
-                    <Input
-                      type="email"
-                      placeholder="you@company.com"
-                      className="pl-10 h-11 border-soft-blue bg-white focus:ring-stripe-purple"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
-                    />
-                  </div>
+                  <h2 className="text-2xl font-light text-deep-navy">Check your email</h2>
+                  <p className="text-slate text-sm leading-relaxed">
+                    We've sent a verification link to <span className="font-medium text-deep-navy">{email}</span>. 
+                    Please click the link to confirm your account.
+                  </p>
                 </div>
-                <div className="space-y-2">
-                  <Label className="text-[10px] font-bold text-slate uppercase tracking-widest">Password</Label>
-                  <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate/40" />
-                    <Input
-                      type="password"
-                      placeholder="••••••••"
-                      className="pl-10 h-11 border-soft-blue bg-white focus:ring-stripe-purple"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                    />
-                  </div>
-                </div>
-                <Button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full h-11 bg-stripe-purple hover:bg-[#4434d4] text-white rounded-md mt-6 border-0 shadow-none transition-all active:scale-[0.98]"
+                <Button 
+                  variant="outline" 
+                  className="w-full h-11 border-soft-blue text-deep-navy"
+                  onClick={() => setIsSubmitted(false)}
                 >
-                  {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : (
-                    <span className="flex items-center gap-2">
-                      Create business account <ArrowRight className="w-4 h-4" />
-                    </span>
-                  )}
+                  Back to signup
                 </Button>
-              </form>
-            </CardContent>
-            <CardFooter className="bg-muted/30 border-t border-soft-blue px-10 py-4 flex justify-center">
-               <p className="text-xs text-slate font-medium">
-                  Already have an account? <Link href="/login" className="text-stripe-purple font-bold hover:underline">Sign in</Link>
-               </p>
-            </CardFooter>
-          </Card>
+              </CardContent>
+              <CardFooter className="bg-muted/30 border-t border-soft-blue px-10 py-4 flex justify-center">
+                <p className="text-xs text-slate font-medium">
+                  Didn&apos;t receive it? <button className="text-stripe-purple font-bold hover:underline">Resend email</button>
+                </p>
+              </CardFooter>
+            </Card>
+          ) : (
+            <Card className="border-soft-blue overflow-hidden bg-white">
+              <CardHeader className="space-y-1 pt-8 px-10">
+                <CardTitle className="text-2xl font-light text-deep-navy">Create your account</CardTitle>
+                <CardDescription className="text-slate text-sm">
+                  Get started with WirePayments in minutes.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="px-10 pb-8 pt-4">
+                <form onSubmit={handleSignup} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label className="text-[10px] font-bold text-slate uppercase tracking-widest">Business Name</Label>
+                    <div className="relative">
+                      <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate/40" />
+                      <Input
+                        placeholder="e.g. Acme Corp"
+                        className="pl-10 h-11 border-soft-blue bg-white focus:ring-stripe-purple"
+                        value={businessName}
+                        onChange={(e) => setBusinessName(e.target.value)}
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-[10px] font-bold text-slate uppercase tracking-widest">Email Address</Label>
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate/40" />
+                      <Input
+                        type="email"
+                        placeholder="you@company.com"
+                        className="pl-10 h-11 border-soft-blue bg-white focus:ring-stripe-purple"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-[10px] font-bold text-slate uppercase tracking-widest">Password</Label>
+                    <div className="relative">
+                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate/40" />
+                      <Input
+                        type="password"
+                        placeholder="••••••••"
+                        className="pl-10 h-11 border-soft-blue bg-white focus:ring-stripe-purple"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                      />
+                    </div>
+                  </div>
+                  <Button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full h-11 bg-stripe-purple hover:bg-[#4434d4] text-white rounded-md mt-6 border-0 shadow-none transition-all active:scale-[0.98]"
+                  >
+                    {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : (
+                      <span className="flex items-center gap-2">
+                        Create business account <ArrowRight className="w-4 h-4" />
+                      </span>
+                    )}
+                  </Button>
+                </form>
+              </CardContent>
+              <CardFooter className="bg-muted/30 border-t border-soft-blue px-10 py-4 flex justify-center">
+                 <p className="text-xs text-slate font-medium">
+                    Already have an account? <Link href="/login" className="text-stripe-purple font-bold hover:underline">Sign in</Link>
+                 </p>
+              </CardFooter>
+            </Card>
+          )}
 
           <div className="mt-8 text-center space-y-4">
              <p className="text-[10px] text-slate font-bold uppercase tracking-widest opacity-60">
