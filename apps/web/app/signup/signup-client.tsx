@@ -40,7 +40,7 @@ export function SignupClient() {
 
       if (data.user) {
         setIsSubmitted(true);
-        toast.success(Verification email sent!);
+        toast.success("Verification email sent!");
       }
     } catch (err: any) {
       toast.error(err.message);
